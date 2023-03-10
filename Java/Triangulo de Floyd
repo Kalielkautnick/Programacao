@@ -1,0 +1,40 @@
+import java.util.Scanner;
+
+public class TrianguloFloyd {
+    public static void main(String[] args) {
+        
+        Scanner entrada = new Scanner(System.in);
+
+        int n = entrada.nextInt();
+        int numero = 1;
+        
+        /*Esse código, gera um sequencial de números, criando
+        * as linhas de baixo com 1 número a mais que a anterior,
+        * o triangulo fica maior dependendo da entrada do usuário.
+        * a entrada do usuário representa o número de linhas que terá
+        * no triângulo
+        */
+        System.out.println("Triângulo de Floyd com " + n + " linhas");
+        for (int linhas = 1; linhas <= n; linhas++) {
+            for (int colunas = 1; colunas <= linhas; colunas++) {
+                System.out.print(numero+ "  ");
+                numero++;
+            }
+            System.out.println(" ");
+        }
+        entrada.close();
+    }
+}
+
+/* Exemplo de entrada: 8
+* Saída:
+* 1
+* 2 3
+* 4 5 6
+* 7 8 9 10
+* 11 12 13 14
+* 15 16 17 18 19
+* 20 21 22 23 24 25
+* 26 27 28 29 30 31 32   
+* apresentou 8 linhas, conforme o usuário informou
+*/
