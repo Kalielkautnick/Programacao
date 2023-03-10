@@ -1,0 +1,68 @@
+import java.util.Scanner;
+
+public class ValidadorCNPJ {
+    int digito1;
+    int digito2;
+
+    public ValidadorCNPJ (String cnpj) {    
+        Scanner a = new Scanner(System.in);
+        int vetor [] = new int[14];
+        int vetor2[] = new int[11];
+       
+        while (cnpj.length() != 11 && cnpj.length() != 14) {
+            System.out.println("CPF ou CNPJ inválido, o número digitado tem " + cnpj.length() + 
+            " dígitos \nCorreto:\nCNPJ: 14 (00.000.000/0000-00) \nCPF: 11 (000.000.000-00)");
+            System.out.print("Digite o CPF ou CNPJ a validar: ");
+        cnpj = a.next().trim().replaceAll("[\\D]", "");
+        }
+        if (cnpj.length() == 14) {
+            for (int i = 0; i < vetor.length; i++) {
+                vetor[i] = Integer.parseInt(cnpj.substring (i, i + 1));
+            }
+            imprimeResultado(validaCNPJ(vetor), cnpj); 
+        } else if (cnpj.length() == 11) {
+            for (int i = 0; i < vetor2.length; i++) {
+                vetor2[i] = Integer.parseInt(cnpj.substring (i, i + 1));
+            } 
+            imprimeResultado(validaCPF(vetor2), cnpj); 
+        }
+        a.close();
+    }
+
+public boolean validaCNPJ(int []vetor) {
+    int somador = (((vetor[0]*5+vetor[1]*4+vetor[2]*3+vetor[3]*2+vetor[4]*9+vetor[5]*8+vetor[6]*7+vetor[7]*6+vetor[8]*5+vetor[9]*4+vetor[10]*3+vetor[11]*2)) % 11);
+                digito1 = ((somador) < 2) ? 0 : 11 - somador;
+    int somador2 = (((vetor[0]*6+vetor[1]*5+vetor[2]*4+vetor[3]*3+vetor[4]*2+vetor[5]*9+vetor[6]*8+vetor[7]*7+vetor[8]*6+vetor[9]*5+vetor[10]*4+vetor[11]*3+vetor[12]*2)) % 11);
+                digito2 = ((somador2) < 2) ? 0 : 11 - somador2;
+    return (digito1 == vetor[12] && digito2 == vetor[13]) ? true : false;
+    }
+
+public boolean validaCPF(int []vetor) {
+    int somador = ((vetor[0]*10+vetor[1]*9+vetor[2]*8+vetor[3]*7+vetor[4]*6+vetor[5]*5+vetor[6]*4+vetor[7]*3+vetor[8]*2) % 11);
+                digito1 = ((somador) < 2) ? 0 : 11 - somador;
+    int somador2 = ((vetor[0]*11+vetor[1]*10+vetor[2]*9+vetor[3]*8+vetor[4]*7+vetor[5]*6+vetor[6]*5+vetor[7]*4+vetor[8]*3+vetor[9]*2) % 11);
+                digito2 = ((somador2) < 2) ? 0 : 11 - somador2;
+    return (digito1 == vetor[9] && digito2 == vetor[10]) ? true : false;       
+    }
+    
+public void imprimeResultado (boolean b, String cnpj) {
+    String s;
+    if (cnpj.length() == 14) {
+        s = (b) ? "\nCNPJ Válido. \n" : "\nCNPJ Inválido. \n";
+        System.out.println(s + cnpj.substring(0,2)+"."+
+                          cnpj.substring(2,5)+"."+cnpj.substring(5,8)+"/"+cnpj.substring(8,12)+"-"+cnpj.substring(12,14));
+    } else {
+        s = (b) ? "\nCPF Válido. \n" : "\nCPF Inválido.\n";
+        System.out.println(s + cnpj.substring(0,3)+"."+
+                          cnpj.substring(3,6)+"."+cnpj.substring(6,9)+"-"+cnpj.substring(9,11));
+    }
+   }   
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        System.out.print("DIGITE UM CPF OU CNPJ: ");
+        String cnpj = sc.next().replaceAll("[\\D]", "").trim();
+        new ValidadorCNPJ(cnpj);
+        sc.close();
+
+    }
+}
