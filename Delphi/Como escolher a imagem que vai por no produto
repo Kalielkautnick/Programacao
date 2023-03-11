@@ -1,0 +1,12 @@
+//COMO ABRIR O GERENCIADOR DE ARQUIVOS E ESCOLHER QUAL FOTO QUER COLOCAR NUM DBIMAGE
+
+
+//NECESSÁRIO UTILIZAR O COMPONENTE: OPENDIALOG, E APENAS REPLICAR O CÓDIGO A SEGUIR
+procedure Tfrm_produto.abrir_fotoClick(Sender: TObject);
+begin
+  //---ABRE FOTOS---//
+  OpenDialog1.Execute; //EXECUTA O OPENDIALOG
+  query_padrao.Edit;
+  DBImage1.Picture.LoadFromFile(OpenDialog1.FileName);
+  Application.MessageBox('Imagem inserida com sucesso.', 'Aviso', MB_OK);
+end;
