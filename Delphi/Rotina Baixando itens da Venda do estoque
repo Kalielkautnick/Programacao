@@ -1,0 +1,179 @@
+{ESSE TRECHO DE CÓDIGO, É A ROTINA QUE O MEU SISTEMA EM DELPHI FAZ PARA BAIXAR DO ESTOQUE OS ITENS DE UMA VENDA
+ELE VALIDA SE PELO MENOS 1 ITEM TEM SALDO SUFICIENTE PARA BAIXAR DO ESTOQUE, CASO 1 OU MAIS ITENS 
+ESTEJAM DISPONIVEIS PARA BAIXAR, O SISTEMA PERGUNTA SE DESEJA FAZER A BAIXA PARCIAL,
+SEJA UMA BAIXA PARCIAL OU COMPLETA, O SISTEMA SÓ BAIXA DO ESTOQUE OS ITENS AINDA NÃO BAIXADOS, E QUE TENHAM ESTOQUE 
+SUFICIENTE, PARA FAZER TODA ESSA ROTINA, FOI NECESSÁRIO 2 FUNCTIONS E 2 PROCEDURES, QUE PODERIAM SER SUBDIVIDIDAS
+EM ROTINAS MAIS ESPECIFICAS SE NECESSÁRIO
+}
+
+procedure Tfrm_venda.bt_baixarClick(Sender: TObject);
+var bol : Boolean;
+var SQL : String;
+begin
+bol = BaixaAprovada;       
+  if bol = true then
+  begin
+    if (DB_BAIXADA.Text = 'N') then
+    begin
+        if Application.MessageBox('Deseja realmente baixar do estoque todos os itens ainda não baixados?',
+                         'Confirmação', MB_YESNO or MB_ICONQUESTION)=IDYES then
+        begin
+        query_item.First;
+        {
+        AQUI O SISTEMA VAI PERCORRER TODO O DATASET DOS ITENS DA VENDA, E VAI VERIFICAR SE ELES AINDA NÃO FORAM
+        BAIXADOS, E TAMBÉM, SE TEM ESTOQUE SUFICIENTE, E DAÍ ELE VAI FAZER UM UPDATE NO ESTOQUE, E BAIXAR
+        O ITEM, CHAMANDO A PROCEDURE BAIXAITEMVENDA 
+        }
+            while not query_item.eof do
+            begin
+            if validaEstoque(query_itemID_PRODUTO.AsString, query_itemCOR.AsString,
+                            query_itemQUALIDADE.AsString, DB_DEPOSITO.Text, query_itemTAMANHO.AsString,
+                            query_itemQTDE.AsString) = true then
+                begin
+                  if (query_itemBAIXADO.AsString = 'N') then
+                  begin
+                  limpaQueryAux();
+                  SQL := 'UPDATE ESTOQUE_PRO SET QUANTIDADE = QUANTIDADE - ' +
+                  '(SELECT UDF_NVL(QTDE) FROM ITEM_VENDA ' +
+                  'WHERE ID_VENDA = :VEN ' +
+                  'AND ID_PRODUTO = :PRO ' +
+                  'AND TAMANHO = :TAM ' =
+                  'AND COR = :PCOR ' +
+                  'AND QUALIDADE = :QUAL) ' + 
+                  'WHERE ID_PRODUTO = :PRO ' +
+                  'AND COR = :PCOR ' +
+                  'AND TAMANHO = :TAM ' +
+                  'AND DEPOSITO = :DEP ' +
+                  'AND QUALIDADE = :QUAL';
+                  query_aux.SQL.Add(SQL);
+                  query_aux.ParamByName('PRO').AsString := query_itemID_PRODUTO.AsString;
+                  query_aux.ParamByName('PCOR').AsString := query_itemCOR.AsString;
+                  query_aux.ParamByName('TAM').AsString := query_itemTAMANHO.AsString;
+                  query_aux.ParamByName('VEN').AsString := query_padraoID_VENDA.Text;
+                  query_aux.ParamByName('DEP').AsString := DB_DEPOSITO.Text;
+                  query_aux.ParamByName('QUAL').AsString := query_itemQUALIDADE.Text;
+                  query_aux.ExecSql;
+                  /////////
+                 baixaItemVenda(0);
+                  end;
+                end;
+              query_item.Next;
+            end;
+            {
+            DEPOIS QUE O DATASET É PERCORRIDO, O SISTEMA SETA A ORDEM DE COMPRA PARA BAIXADA
+            }
+          query_padrao.Edit;
+          query_padraoBAIXADA.AsString := 'S';
+          query_padrao.Post;
+
+          showmessage('Itens baixados com sucesso!');
+          query_padrao.Refresh;
+        end
+        else
+          query_padrao.Refresh;
+    end
+    else if (DB_BAIXADA.Text = 'S') then
+    begin
+      showmessage('Ordem de compra já foi baixada.');
+    end;
+  end;
+end;
+//**********************************************************************//
+{
+AQUI, É QUANDO VAMOS VER SE O USUÁRIO VAI QUERER FAZER BAIXA PARCIAL, SE A BAIXA VAI SER REALIZADA TOTAL,
+OU SE A BAIXA VAI SER CANCELADA POR NÃO TER ITENS COM SALDO.
+}
+function Tfrm_venda.BaixaAprovada : Boolean;
+begin
+        if validaSaldoItens = 1 then
+        begin
+          if Application.MessageBox('Existe itens com saldo insuficiente para baixar do estoque, deseja fazer a baixa parcial?',
+                         'Confirmação', MB_YESNO or MB_ICONQUESTION)=IDYES then
+              begin
+                result := true;
+                abreTelaEstoque_venda;
+              end
+              else
+              result := false;
+        end
+        else if validaSaldoItens = 0 then
+        begin
+             result := true;
+        end
+        else if validaSaldoItens = -1 then
+        begin
+              Application.MessageBox('Nenhum item da venda possui saldo suficiente para baixar do estoque.' +
+              sLineBreak + 'Impossível continuar.',
+                         'Confirmação', MB_OK);
+             result := false;
+             abreTelaEstoque_venda;
+        end;
+end;
+
+//*******************************************************//
+{
+A FUNCTION VALIDASALDOITENS, PODE RETORNAR 3 VALORES INTEIROS: (-1, 0, 1), QUE SERÃO USADOS PARA TERMOS UM 
+CONTROLE, QUE SÃO 3 SITUAÇÕES DIFERENTES:
+-1 : NENHUM DOS ITENS DA VENDA TEM SALDO DISPONÍVEL NO ESTOQUE -> BLOQUEAR A BAIXA.
+0 : TODOS OS ITENS DA VENDA TEM SALDO DISPONÍVEL -> REALIZA A BAIXA.
+1 : PELO MENOS 1 DOS ITENS NÃO TEM SALDO DISPONÍVEL NO ESTOQUE -> PERGUNTA SE DESEJA BAIXAR PARCIAL.
+}
+function Tfrm_venda.validaSaldoItens: Integer;
+var n, s : Integer;
+begin
+query_item.First;
+            while not query_item.eof do
+            begin
+                if validaEstoque(query_itemID_PRODUTO.AsString, query_itemCOR.AsString,
+                            query_itemQUALIDADE.AsString, DB_DEPOSITO.Text, query_itemTAMANHO.AsString,
+                            query_itemQTDE.AsString) = true then
+                begin
+                  inc(s);
+                end
+                else if validaEstoque(query_itemID_PRODUTO.AsString, query_itemCOR.AsString,
+                            query_itemQUALIDADE.AsString, DB_DEPOSITO.Text, query_itemTAMANHO.AsString,
+                            query_itemQTDE.AsString) = false then
+                begin
+                   inc(n);
+                end;
+             query_item.Next;
+            end;
+     if (s > 0) and (n > 0) then
+          begin
+            result := 1;
+          end;
+     if (s > 0) and (n = 0) then
+          begin
+            result := 0;
+          end;
+     if (s = 0) then
+          begin
+            result := - 1;
+          end;
+end;
+//**********************************************************************//
+{
+ESSA FUNÇÃO VALIDA SE O PRODUTO, COR, TAMANHO, QUALIDADE, TEM QUANTIDADE NO ESTOQUE MAIOR OU IGUAL A
+QUANTIDADE DO ITEM DENTRO DA VENDA, E RETORNA VERDADEIRO OU FALSO
+}
+
+function Tfrm_venda.validaEstoque(produto, cor, qualidade, deposito, tam, qtde: String): Boolean;
+begin
+limpaQueryAux();
+query_aux.SQL.Add('SELECT DISTINCT E.ID_PRODUTO FROM ESTOQUE_PRO E ' +
+                  'WHERE E.ID_PRODUTO = :PRO ' +
+                  'AND E.DEPOSITO = :DEP ' +
+                  'AND E.QUALIDADE = :QUAL ' +
+                  'AND E.COR = :COR ' +
+                  'AND E.TAMANHO = :TAM ' +
+                  'AND E.QUANTIDADE >= :QUANT');
+query_aux.ParamByName('PRO').AsString := produto;
+query_aux.ParamByName('DEP').AsString := deposito;
+query_aux.ParamByName('COR').AsString := cor;
+query_aux.ParamByName('TAM').AsString := tam;
+query_aux.ParamByName('QUAL').AsString := qualidade;
+query_aux.ParamByName('QUANT').AsFloat := strToFloat(qtde);
+query_aux.Open;
+
+result := query_aux.RecordCount > 0;
+end;
