@@ -1,4 +1,5 @@
----
+//Essa procedure, foi criada para alterar a data dentro de um edit somente com os atalhos: (+ , - ,  =) - mais, menos ou igual.
+//Apliquei essa funcionalidade no meu sistema sem nenhuma dificuldade, e funciona super bem.
 
 procedure Tfrm_pesquisa_padrao.edt_Data_InicioKeyPress(Sender: TObject; var Key: Char);
 var aux : String;
