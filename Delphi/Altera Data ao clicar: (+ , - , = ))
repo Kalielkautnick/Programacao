@@ -1,0 +1,44 @@
+---
+
+procedure Tfrm_pesquisa_padrao.edt_Data_InicioKeyPress(Sender: TObject; var Key: Char);
+var aux : String;
+begin
+     //Caso o usuário clique no botão de " + ", ele vai somar +1 dia no Edit de data
+     if (key = #43) then
+      begin
+        key := #0;
+        if validaData(edt_fim.Text) = true then
+        begin
+            aux := DateToStr(StrToDate(edt_fim.Text)+1)
+            edt_fim.Text := aux;      
+        end;
+      end;
+      //Caso o usuário clique no botão de " - ", ele vai diminuir -1 dia no Edit de data
+     if (key = #45) then
+      begin
+        key := #0;
+        if validaData(edt_fim.Text) = true then
+          begin
+            aux := DateToStr(StrToDate(edt_fim.Text)-1);
+            edt_fim.Text := aux;
+          end;
+      end;
+    //Caso o usuário clique no botão de " = ", ele vai jogar a data de hoje no Edit de data
+     if (key = #61) then
+      begin
+        key := #0;
+        edt_fim.Text := DateToStr(now);
+    end;
+end;
+
+//Abaixo esta a function que retorna se a data contida num edit é valida ou não.
+function Tfrm_pesquisa_padrao.validaData(data: String): Boolean;
+var validador: TDateTime;
+begin
+    if not TryStrToDate(data, validador) then
+    begin
+      result := false;
+    end
+    else
+    result := true;
+end;
