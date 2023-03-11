@@ -1,0 +1,68 @@
+{
+ESSA É A ROTINA QUE FAZ A INSERÇÃO DO PRODUTO QUE ESTAMOS CADASTRANDO NO ESTOQUE
+ELE INSERE O PRODUTO NOVO EM TODOS OS DEPÓSITOS ATIVOS, EM TODAS CORES
+QUE INFORMAMOS NO PRODUTO, EM TODOS OS TAMANHOS DA FAIXA DE TAMANHOS QUE 
+ESCOLHEMOS PARA O PRODUTO
+}
+
+procedure Tfrm_produto.insereEstoqueCompleto;
+var i, j: Integer;
+begin
+query_deposito.First;
+//PERCORRE TODOS OS DEPÓSITOS
+    while not query_deposito.Eof do
+        begin
+            if (query_depositoATIVO.AsString = 'ATIVO') then
+            begin
+                //PERCRRE O GRID DAS CORES
+                query_estoque.First;
+                for i := 0 to grid_cor.DataSource.DataSet.RecordCount - 1 do
+                begin
+                      //PERCORRE TODOS OS TAMANHOS DA FAIXA QUE ESCOLHEMOS PARA O PRODUTO
+                      query_faixa_item.First;
+                      for j := 0 to grid_tamanho.DataSource.DataSet.RecordCount - 1 do
+                      begin
+                      {AGORA, SE O TAMANHO NÃO EXISTE NO PRODUTO, ELE INSERE.
+                      OS TAMANHOS QUE NÃO FOREM INSERIDOS, É PORQUE JÁ EXISTEM....
+                      DEPOIS DE INSERIR TUDO, VAI SER DELETADO TODOS OS TAMANHOS DO PRODUTO
+                      QUE NÃO EXISTEM NA FAIXA}
+                      limpaQuerys();
+                      query_aux.SQL.Add('SELECT ID_PRODUTO FROM ESTOQUE_PRO ' +
+                      'WHERE CAST(ID_PRODUTO AS VARCHAR(20)) = :COD ' +
+                      'AND TAMANHO = :TAM ' +
+                      'AND COR = :PCOR ' +
+                      'AND DEPOSITO = :DEP');
+                      query_aux.ParamByName('COD').AsString := query_padraoID_PRODUTO.AsString;
+                      query_aux.ParamByName('TAM').AsString := query_faixa_itemTAMANHO.AsString;
+                      query_aux.ParamByName('PCOR').AsString := query_estoqueCOR.AsString;
+                      query_aux.ParamByName('DEP').AsInteger := query_depositoDEPOSITO.AsInteger;
+                      query_aux.Open;
+                            if (query_aux.RecordCount = 0) then
+                            begin
+                              limpaQuerys();
+                              query_aux.SQL.Add('INSERT INTO ESTOQUE_PRO ' +
+                              '(ID_PRODUTO, DEPOSITO, QUANTIDADE, QUALIDADE, TAMANHO, COR) ' +
+                              'VALUES (:PCOD,:PDEP,:PQUANT,:PQUAL,:PTAM, :PCOR)');
+                               query_aux.ParamByName('PCOD').AsString := query_padraoID_PRODUTO.AsString;
+                                query_aux.ParamByName('PDEP').AsInteger := query_depositoDEPOSITO.AsInteger;
+                                query_aux.ParamByName('PQUANT').AsFloat := 0;
+                                query_aux.ParamByName('PQUAl').AsString := '1';
+                                query_aux.ParamByName('PTAM').AsString := query_faixa_itemTAMANHO.AsString;
+                                query_aux.ParamByName('PCOR').AsString := query_estoqueCOR.AsString;
+                                query_aux.ExecSQL;
+                            end;
+                            
+                       //VAI PARA O PRÓXIMO TAMANHO      
+                       grid_tamanho.DataSource.DataSet.Next;
+                      end;
+                      
+                    //VAI PARA A PRÓXIMA COR  
+                    grid_cor.DataSource.DataSet.Next;
+                end;
+            end;
+            
+            //VAI PARA O PRÓXIMO DEPÓSITO ATIVO
+            query_deposito.Next;
+        end;
+      queryEstoque;
+end;
