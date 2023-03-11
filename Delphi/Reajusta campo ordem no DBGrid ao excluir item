@@ -1,0 +1,40 @@
+{ Essa procedure aqui, ajusta o campo de ordem caso eu delete um item que estava em um DBGrid.
+--Exemplo:
+ORDEM   TAMANHO    FAIXA
+1          P         08
+2          M         08
+3          G         08
+4          GG        08
+_______________________
+
+Agora, se eu deletar o tamanho G, que está na ordem 3, a ordem ficaria prejudicada: 1,2,4
+Então, quando deletamos um item entre esses 4, a ordem precisa voltar a ficar 1,2,3
+este será o resultado após o grid passar pela procedure abaixo:
+ORDEM   TAMANHO    FAIXA
+1          P         08
+2          M         08
+3          GG        08
+}
+
+procedure Tfrm_faixa_tamanho.ajustaDBGrid;
+var i : Integer;
+begin
+ with grid_tamanho.DataSource.DataSet do
+  begin
+    DisableControls;
+    try
+      First;
+      for i := 1 to RecordCount do
+      begin
+        Edit;
+        grid_tamanho.Fields[0].Value := i;
+        Post;
+        Next;
+      end;
+      query_padrao.Refresh;
+      dec(posicao);
+    finally
+      EnableControls;
+    end;
+  end;
+end;
