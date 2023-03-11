@@ -1,0 +1,30 @@
+//é uma função que eu criei tem um conceito muito simples, cada vez que o usuário preenche 
+//algum campo, como por exemplo: "fornecedor" = 8.
+//ao invés de ficar validando por query auxiliar cada um dos campos
+//montando SQLs diferentes e ver se retorna alguma coisa, a FUNCTION monta um SQL dinamico,
+//basta vc inserir como parâmetro o nome da tabela, o campo da tabela e o valor digitado no edit
+
+//dessa forma, ao sair do campo, vc só vai precisar usar essa função:
+{
+if campoExiste('FORNECEDOR', 'ID_FORNECEDOR', edt_fornecedor.Text) = false then
+begin
+    edt_fornecedor.SetFocus;
+    showMessage('Fornecedor não existe!');
+end;
+}
+
+function Tfrm_venda.campoExiste(tabela, campo, valor: String): Boolean;
+var SQL : String;
+begin
+try
+SQL := 'SELECT DISTINCT ' + campo + ' FROM ' + tabela + ' WHERE ' + campo + ' = :V';
+limpaQueryAux();
+query_aux.SQL.Add(SQL);
+query_aux.ParamByName('V').AsString := valor;
+query_aux.Open;
+result := query_aux.RecordCount > 0;
+end;
+except
+result := false;
+end;
+end;
