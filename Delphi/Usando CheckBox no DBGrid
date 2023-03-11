@@ -1,0 +1,43 @@
+{
+NESSA FUNÇÃO DRAWCOLUMNCELL, CONSEGUIMOS SUBSTITUIR VALORES COMO POR EXEMPLO: (S / N)
+POR UMA IMAGELIST DE CHECKBOX MARCADO E DESMARCADO, QUE DEPOIS VÃO SE ALTERAR CONFORME A GENTE CLICA EM CIMA DO CAMPO
+SEGUE ABAIXO AS DUAS PROCEDURES QUE FAZEM ESTA FUNCIONALIDADE SEM NENHUM PROBLEMA
+}
+
+//NESSA PROCEDURE, TODO O DATASET, NO CAMPO IMPORTA, AO INVES DOS VALORES S e N, VAI
+//SER SUBSTITUIDO POR IMAGENS DE CHECKBOX MARCADO OU DESMARCADO
+procedure Tfrm_venda.DBGrid3DrawColumnCell(Sender: TObject; const Rect: TRect;
+  DataCol: Integer; Column: TColumn; State: TGridDrawState);
+var R: TRect;
+begin
+	if Column.Field = query_importacaoIMPORTA then
+		begin
+			DBGrid3.Canvas.FillRect(Rect);
+			imgCheck.Draw(DBGrid3.Canvas, Rect.Left + 10, Rect.Top + 1, 0);
+			    if query_importacaoIMPORTA.AsString = 'S' then
+			    begin
+			        imgCheck.Draw(DBGrid3.Canvas, Rect.Left + 10, Rect.Top + 1, 0);
+			    end
+			    else
+			        imgCheck.Draw(DBGrid3.Canvas, Rect.Left + 10, Rect.Top + 1, 1);
+		      end;
+end;
+
+//E ESSA PROCEDURE, NO EVENTO CELLCLICK, VALIDA QUAL É A COLUNA CLICADA, SE FOR A COLUNA QUE QUEREMOS ALTERAR A CHECKBOX
+//ENTÃO TROCAMOS ELA PARA O VALOR OPOSTO.
+
+procedure Tfrm_venda.DBGrid3CellClick(Column: TColumn);
+begin
+if Column.Field = query_importacaoIMPORTA then
+		begin
+      query_importacao.Edit;
+      if (query_importacaoIMPORTA.AsString = 'S') then
+          begin
+            query_importacaoIMPORTA.AsString := 'N';
+          end
+          else
+          begin
+            query_importacaoIMPORTA.AsString := 'S';
+          end;
+    end;
+end;
