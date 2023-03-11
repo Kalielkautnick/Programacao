@@ -1,0 +1,37 @@
+{
+esse algoritmo em específico não foi criado por mim, encontrei em um fórum de Delphi e só aprimorei alguns detalhes.
+coloquei aqui porque usei muito ele no meu sistema em Delphi, e é um utilitário que funciona super bem.
+}
+
+procedure Tfrm_editor_sql.redimensionarColunas();
+var
+  i, j, k, w: integer;
+  s, titulo: string;
+  savePos: TBookmark;
+begin
+  savePos := DBGrid1.DataSource.DataSet.GetBookmark;
+  try
+    for i := 0 to DBGrid1.Columns.Count - 1 do
+    begin
+      w := 0;
+      DBGrid1.DataSource.DataSet.First;
+      for j := 0 to DBGrid1.DataSource.DataSet.RecordCount - 1 do
+      begin
+      titulo := DBGrid1.Columns[i].Title.Caption;
+      k := DBGrid1.Canvas.TextWidth(titulo);
+        s := DBGrid1.DataSource.DataSet.Fields[i].DisplayText;
+        if DBGrid1.Canvas.TextWidth(s) > w then
+          w := DBGrid1.Canvas.TextWidth(s);
+        DBGrid1.DataSource.DataSet.Next;
+      end;
+      if w > k then
+      begin
+      DBGrid1.Columns[i].Width := w + 15;
+      end
+      else
+      DBGrid1.Columns[i].Width := k + 15;
+    end;
+  finally
+    DBGrid1.DataSource.DataSet.GotoBookmark(savePos);
+  end;
+end;
