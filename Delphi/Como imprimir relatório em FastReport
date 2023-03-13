@@ -1,0 +1,35 @@
+//ESSE TRECHO DE CÓDIGO, FAZ O SISTEMA IMPRIMIR O RELATÓRIO GRAFICAMENTE EM FASTREPORT, 
+//UTILIZANDO A FERRAMENTA DO FASTREPORT, PARA ISSO PRECISA USAR OS COMPONENTES frxReport e frxDBDataset
+//DEPOIS, ADICIONAR ESSE EVENTO AO CLICAR EM IMPRIMIR.
+
+procedure Tfrm_usuarios.btn_imprimirClick(Sender: TObject);
+begin
+//FAZENDO UMA ORDENAÇÃO PELO CAMPO DE TIPO DE USUÁRIOS ANTES DE IMPRIMIR, PARA ESTE RELATÓRIO FICAR AGRUPADO CORRETAMENTE
+  DBGrid1.Columns[3].Title.Font.Style := [];
+	TFDQuery(DBGrid1.DataSource.Dataset).indexFieldNames := 'TIPO';
+
+//CHAMA A PROCEDURE QUE IMPRIME O RELATÓRIO, PASSANDO O NOME DO ARQUIVO COMO PARÂMETRO
+  imprimirRelatorio('rel_usuarios.fr3');
+end;
+
+
+procedure Tfrm_usuarios.imprimirRelatorio(relatorio: String);
+var caminho : String;
+begin
+{--------- o ExtractFilePath(Application.ExeName) retorna a seguinte String:
+//C:\Curso Delphi\BASE - ESTOQUE - ULTIMA VERSAO\SISTEMA\Win64\Debug\
+então, vamos fazer um replace, e jogar na seguinte pasta:
+C:\Curso Delphi\BASE - ESTOQUE - ULTIMA VERSAO\RELATORIOS\
+dessa forma, qualquer pessoa que instalar as pastas junto com o programa, vai conseguir imprimir porque o caminho é genérico -----------}
+
+caminho := StringReplace(ExtractFilePath(Application.ExeName),
+                          'SISTEMA\Win64\Debug','RELATORIOS\', [rfReplaceAll]);
+
+	if frm_usuarios.frxReport.LoadFromFile(caminho + relatorio) then
+	    begin
+		    frxReport.Clear;
+		    frxReport.LoadFromFile(caminho + relatorio);
+		    frxReport.PrepareReport(true);
+		    frxReport.ShowPreparedReport;
+	    end;
+end;
