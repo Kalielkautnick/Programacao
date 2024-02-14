@@ -1,0 +1,55 @@
+MERGE INTO PA_ITEN_001 PA
+USING (
+SELECT CODIGO, COR, ROW_NUMBER() OVER (PARTITION BY CODIGO ORDER BY CODIGO) AS ORDEM_CERTA
+    FROM (
+        SELECT DISTINCT CODIGO, COR
+        FROM PA_ITEN_001
+        WHERE CODIGO IN (
+            SELECT DISTINCT CODIGO
+            FROM (
+                SELECT CODIGO, ORDEM
+                FROM (
+                    SELECT CODIGO, COR, ORDEM
+                    FROM PA_ITEN_001
+                    GROUP BY CODIGO, COR, ORDEM
+                    HAVING COUNT(*) > 1
+                ) TAB
+                GROUP BY CODIGO, ORDEM
+                HAVING COUNT(*) > 1
+            ) TAB2
+        ) 
+    ) TAB3
+) ORDEM ON ((ORDEM.CODIGO = PA.CODIGO AND ORDEM.COR = PA.COR))
+WHEN MATCHED THEN
+UPDATE SET PA.ORDEM = ORDEM.ORDEM_CERTA;
+
+--------------------------------------------------------------------------------------
+
+MERGE INTO PA_ITEN_001 PA
+USING (
+SELECT CODIGO, COR, ROW_NUMBER() OVER (PARTITION BY CODIGO ORDER BY CODIGO) AS ORDEM_CERTA
+    FROM (
+        SELECT DISTINCT CODIGO, COR
+        FROM PA_ITEN_001
+        WHERE CODIGO IN (
+            SELECT DISTINCT CODIGO
+            FROM (
+		SELECT CODIGO, COR FROM (
+     			SELECT CODIGO, COR
+     			FROM PA_ITEN_001
+     			WHERE ORDEM = '1'
+     		GROUP BY CODIGO, COR, ORDEM
+     		HAVING COUNT(*) > 1
+	UNION ALL
+    		 	SELECT CODIGO, COR
+     		 	FROM PA_ITEN_001
+     		 	WHERE ORDEM <> '1'
+     		GROUP BY CODIGO, COR, ORDEM
+     		HAVING COUNT(*) > 1) TAB
+	GROUP BY CODIGO, COR
+	HAVING COUNT(*) > 1) TAB2
+        ) 
+    ) TAB3
+) ORDEM ON ((ORDEM.CODIGO = PA.CODIGO AND ORDEM.COR = PA.COR))
+WHEN MATCHED THEN
+UPDATE SET PA.ORDEM = ORDEM.ORDEM_CERTA;
