@@ -1,0 +1,328 @@
+--------------------------------------------------------------------------------------------------------
+----------- Formartar String de CPF/CNPJ ---------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------
+
+-- EXEMPLO DE USO:
+-- SELECT FORMATA_CPF_CNPJ(CAMPO,FORMATADO) FROM FSIS_SINGLE_ROW
+-- SELECT FORMATA_CPF_CNPJ('110.270.349-42','S') FROM FSIS_SINGLE_ROW
+
+CREATE OR ALTER FUNCTION FORMATA_CPF_CNPJ (DOC VARCHAR(20), FORMATADO VARCHAR(1))
+RETURNS VARCHAR(20)
+AS
+DECLARE VARIABLE vDoc VARCHAR(20);
+DECLARE VARIABLE R_DOC VARCHAR(20);
+BEGIN
+    
+    IF (DOC IS NOT NULL AND FORMATADO IS NOT NULL) THEN
+    BEGIN
+	    
+	    vDoc = replace(replace(replace(replace(DOC,'-',''),'/',''),'-',''),'.','') ;
+	   
+	    IF (FORMATADO = 'S') THEN
+	    BEGIN	    
+		    IF (CHAR_LENGTH(vDoc) = 11) THEN
+		    BEGIN
+		    	R_DOC = (substring(vDoc FROM 1 FOR 3) || '.' || substring(vDoc FROM 4 FOR 3) || '.' || substring(vDoc FROM 7 FOR 3) || '-' || substring(vDoc FROM 10 FOR 2));
+		    END
+		    IF (CHAR_LENGTH(vDoc) = 14) THEN
+		    BEGIN
+		    	R_DOC = (substring(vDoc FROM 1 FOR 2) || '.' || substring(vDoc FROM 3 FOR 3) || '.' || substring(vDoc FROM 6 FOR 3) || '/' || substring(vDoc FROM 9 FOR 4) || '-' || substring(vDoc FROM 13 FOR 2));
+		    END
+		 END
+		 ELSE
+		 BEGIN
+		 IF (FORMATADO = 'N') THEN 
+		 BEGIN 
+			R_DOC = vDoc; 
+		 END
+	  END
+	END
+	RETURN R_DOC;
+END;
+
+------------------------------------------------FUNCTION para formatar número de telefone------------------------------------------------------------------------------------
+CREATE OR ALTER FUNCTION FORMATA_TELEFONE (VALOR_ORIGINAL VARCHAR(100), TIPO VARCHAR(10))
+RETURNS VARCHAR(100)
+AS
+DECLARE VARIABLE VALOR_TRATADO VARCHAR(100);
+DECLARE VARIABLE TOTAL_CARACTERES VARCHAR(100);
+DECLARE VARIABLE RETORNO_VALOR VARCHAR(100);
+BEGIN
+    IF (VALOR_ORIGINAL IS NOT NULL AND TIPO IS NOT NULL AND TIPO = 'TELEFONE') THEN  
+    BEGIN
+	    VALOR_TRATADO = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(VALOR_ORIGINAL, '(', ''), ')', ''), '+', ''), ' ', ''), '-', '');
+	    TOTAL_CARACTERES = CHAR_LENGTH(VALOR_TRATADO);
+	   
+	    IF (TOTAL_CARACTERES = '14') THEN
+		    BEGIN	    
+			    RETORNO_VALOR = SUBSTRING(VALOR_TRATADO FROM 6 FOR 30);
+			END
+			
+	    IF (TOTAL_CARACTERES = '13' AND SUBSTRING(VALOR_TRATADO FROM 3 FOR 1) =  '0') THEN
+		    BEGIN	    
+			    RETORNO_VALOR = SUBSTRING(VALOR_TRATADO FROM 6 FOR 30);
+			END
+			
+	    IF (TOTAL_CARACTERES = '13' AND SUBSTRING(VALOR_TRATADO FROM 3 FOR 1) <>  '0') THEN
+		    BEGIN	    
+			    RETORNO_VALOR = SUBSTRING(VALOR_TRATADO FROM 5 FOR 30);
+			END
+			
+	    IF (TOTAL_CARACTERES = '12' AND SUBSTRING(VALOR_TRATADO FROM 1 FOR 1) = '0') THEN
+		    BEGIN	    
+			    RETORNO_VALOR = SUBSTRING(VALOR_TRATADO FROM 4 FOR 30);
+			END
+			
+	    IF (TOTAL_CARACTERES = '12' AND SUBSTRING(VALOR_TRATADO FROM 1 FOR 1) <> '0') THEN
+		    BEGIN	    
+			    RETORNO_VALOR = SUBSTRING(VALOR_TRATADO FROM 5 FOR 30);
+			END				
+					
+	    IF (TOTAL_CARACTERES = '11' AND SUBSTRING(VALOR_TRATADO FROM 1 FOR 1) <> '0') THEN
+		    BEGIN	    
+			    RETORNO_VALOR = SUBSTRING(VALOR_TRATADO FROM 3 FOR 30);
+			END
+					
+	    IF (TOTAL_CARACTERES = '11' AND SUBSTRING(VALOR_TRATADO FROM 1 FOR 1) = '0') THEN
+		    BEGIN	    
+			    RETORNO_VALOR = SUBSTRING(VALOR_TRATADO FROM 4 FOR 30);
+			END
+					
+	    IF (TOTAL_CARACTERES = '10') THEN
+		    BEGIN	    
+			    RETORNO_VALOR = SUBSTRING(VALOR_TRATADO FROM 3 FOR 30);
+			END
+			
+	    IF (TOTAL_CARACTERES IN ('9', '8')) THEN
+		    BEGIN	    
+			    RETORNO_VALOR = VALOR_TRATADO ;
+			END
+	END
+	
+	    IF (VALOR_ORIGINAL IS NOT NULL AND TIPO IS NOT NULL AND TIPO = 'DDD') THEN  
+    BEGIN
+	    VALOR_TRATADO = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(VALOR_ORIGINAL, '(', ''), ')', ''), '+', ''), ' ', ''), '-', '');
+	    TOTAL_CARACTERES = CHAR_LENGTH(VALOR_TRATADO);
+	   
+	    IF (TOTAL_CARACTERES IN ('8', '9')) THEN
+		    BEGIN	    
+			    RETORNO_VALOR = '';
+			END
+	   
+	    IF (TOTAL_CARACTERES = '10') THEN
+		    BEGIN	    
+			    RETORNO_VALOR = SUBSTRING(VALOR_TRATADO FROM 1 FOR 2);
+			END
+	   
+	    IF (TOTAL_CARACTERES = '11' AND SUBSTRING(VALOR_TRATADO FROM 1 FOR 1) = 0 ) THEN
+		    BEGIN	    
+			    RETORNO_VALOR = SUBSTRING(VALOR_TRATADO FROM 2 FOR 2);
+			END
+	   
+	    IF (TOTAL_CARACTERES = '11' AND SUBSTRING(VALOR_TRATADO FROM 1 FOR 1) <> 0 ) THEN
+		    BEGIN	    
+			    RETORNO_VALOR = SUBSTRING(VALOR_TRATADO FROM 1 FOR 2);
+			END
+	   
+	    IF (TOTAL_CARACTERES = '12' AND SUBSTRING(VALOR_TRATADO FROM 1 FOR 1) = 0 ) THEN
+		    BEGIN	    
+			    RETORNO_VALOR = SUBSTRING(VALOR_TRATADO FROM 2 FOR 2);
+			END
+	   
+	    IF (TOTAL_CARACTERES = '12' AND SUBSTRING(VALOR_TRATADO FROM 1 FOR 1) <> 0 ) THEN
+		    BEGIN	    
+			    RETORNO_VALOR = SUBSTRING(VALOR_TRATADO FROM 1 FOR 2);
+			END
+	   
+	    IF (TOTAL_CARACTERES = '13' AND SUBSTRING(VALOR_TRATADO FROM 3 FOR 1) = 0 ) THEN
+		    BEGIN	    
+			    RETORNO_VALOR = SUBSTRING(VALOR_TRATADO FROM 4 FOR 2);
+			END
+	   
+	    IF (TOTAL_CARACTERES = '13' AND SUBSTRING(VALOR_TRATADO FROM 3 FOR 1) <> 0 ) THEN
+		    BEGIN	    
+			    RETORNO_VALOR = SUBSTRING(VALOR_TRATADO FROM 3 FOR 2);
+			END
+	   
+	    IF (TOTAL_CARACTERES = '14') THEN
+		    BEGIN	    
+			    RETORNO_VALOR = SUBSTRING(VALOR_TRATADO FROM 4 FOR 2);
+			END
+	END
+	
+	RETURN RETORNO_VALOR;
+END
+-----------------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------
+----------- Separar DDD e Telefone  --------------------------
+--------------------------------------------------------------------------------------------------------
+
+-- EXEMPLO DE USO:
+-- SELECT PHONECONVERTER('(47) 22222-1111 BANANA!', 'fone') FROM RDB$DATABASE 
+-- SELECT PHONECONVERTER('(47) 22222-1111 ABACATE+MELANCIA', 'ddd') FROM RDB$DATABASE 
+
+CREATE OR ALTER FUNCTION PHONECONVERTER (INPUTSTRING VARCHAR(100), CONVERSIONTYPE VARCHAR(10))
+RETURNS VARCHAR(100)
+AS
+DECLARE VARIABLE PHONE VARCHAR(100);
+DECLARE VARIABLE CHAR_COUNT VARCHAR(100);
+DECLARE VARIABLE OUTPUTSTRING VARCHAR(100);
+BEGIN
+	PHONE = REPLACE(MULTIREPLACE(:INPUTSTRING, '{}()abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZÀÁÂÃÄÅÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝÞßàáâãäåçèéêëìíîïðñòóôõöøùúûüýþÿ-|\/*-+.=&¨%$#@!', '          '), ' ', '');
+	CHAR_COUNT = CHAR_LENGTH(PHONE);
+
+    IF (PHONE IS NOT NULL AND CONVERSIONTYPE IS NOT NULL AND UPPER(CONVERSIONTYPE) = 'FONE') THEN  
+    BEGIN	   
+	    IF (CHAR_COUNT = '14') THEN
+		    BEGIN	    
+			    OUTPUTSTRING = SUBSTRING(PHONE FROM 6 FOR 30);
+			END
+			
+	    IF (CHAR_COUNT = '13' AND SUBSTRING(PHONE FROM 3 FOR 1) =  '0') THEN
+		    BEGIN	    
+			    OUTPUTSTRING = SUBSTRING(PHONE FROM 6 FOR 30);
+			END
+			
+	    IF (CHAR_COUNT = '13' AND SUBSTRING(PHONE FROM 3 FOR 1) <>  '0') THEN
+		    BEGIN	    
+			    OUTPUTSTRING = SUBSTRING(PHONE FROM 5 FOR 30);
+			END
+			
+	    IF (CHAR_COUNT = '12' AND SUBSTRING(PHONE FROM 1 FOR 1) = '0') THEN
+		    BEGIN	    
+			    OUTPUTSTRING = SUBSTRING(PHONE FROM 4 FOR 30);
+			END
+			
+	    IF (CHAR_COUNT = '12' AND SUBSTRING(PHONE FROM 1 FOR 1) <> '0') THEN
+		    BEGIN	    
+			    OUTPUTSTRING = SUBSTRING(PHONE FROM 5 FOR 30);
+			END				
+					
+	    IF (CHAR_COUNT = '11' AND SUBSTRING(PHONE FROM 1 FOR 1) <> '0') THEN
+		    BEGIN	    
+			    OUTPUTSTRING = SUBSTRING(PHONE FROM 3 FOR 30);
+			END
+					
+	    IF (CHAR_COUNT = '11' AND SUBSTRING(PHONE FROM 1 FOR 1) = '0') THEN
+		    BEGIN	    
+			    OUTPUTSTRING = SUBSTRING(PHONE FROM 4 FOR 30);
+			END
+					
+	    IF (CHAR_COUNT = '10') THEN
+		    BEGIN	    
+			    OUTPUTSTRING = SUBSTRING(PHONE FROM 3 FOR 30);
+			END
+			
+	    IF (CHAR_COUNT IN ('9', '8')) THEN
+		    BEGIN	    
+			    OUTPUTSTRING = PHONE ;
+			END
+	END
+	
+	    IF (PHONE IS NOT NULL AND CONVERSIONTYPE IS NOT NULL AND UPPER(CONVERSIONTYPE) = 'DDD') THEN  
+    BEGIN
+	   
+	    IF (CHAR_COUNT IN ('8', '9')) THEN
+		    BEGIN	    
+			    OUTPUTSTRING = '';
+			END
+	   
+	    IF (CHAR_COUNT = '10') THEN
+		    BEGIN	    
+			    OUTPUTSTRING = SUBSTRING(PHONE FROM 1 FOR 2);
+			END
+	   
+	    IF (CHAR_COUNT = '11' AND SUBSTRING(PHONE FROM 1 FOR 1) = 0 ) THEN
+		    BEGIN	    
+			    OUTPUTSTRING = SUBSTRING(PHONE FROM 2 FOR 2);
+			END
+	   
+	    IF (CHAR_COUNT = '11' AND SUBSTRING(PHONE FROM 1 FOR 1) <> 0 ) THEN
+		    BEGIN	    
+			    OUTPUTSTRING = SUBSTRING(PHONE FROM 1 FOR 2);
+			END
+	   
+	    IF (CHAR_COUNT = '12' AND SUBSTRING(PHONE FROM 1 FOR 1) = 0 ) THEN
+		    BEGIN	    
+			    OUTPUTSTRING = SUBSTRING(PHONE FROM 2 FOR 2);
+			END
+	   
+	    IF (CHAR_COUNT = '12' AND SUBSTRING(PHONE FROM 1 FOR 1) <> 0 ) THEN
+		    BEGIN	    
+			    OUTPUTSTRING = SUBSTRING(PHONE FROM 1 FOR 2);
+			END
+	   
+	    IF (CHAR_COUNT = '13' AND SUBSTRING(PHONE FROM 3 FOR 1) = 0 ) THEN
+		    BEGIN	    
+			    OUTPUTSTRING = SUBSTRING(PHONE FROM 4 FOR 2);
+			END
+	   
+	    IF (CHAR_COUNT = '13' AND SUBSTRING(PHONE FROM 3 FOR 1) <> 0 ) THEN
+		    BEGIN	    
+			    OUTPUTSTRING = SUBSTRING(PHONE FROM 3 FOR 2);
+			END
+	   
+	    IF (CHAR_COUNT = '14') THEN
+		    BEGIN	    
+			    OUTPUTSTRING = SUBSTRING(PHONE FROM 4 FOR 2);
+			END
+	END
+	
+	RETURN OUTPUTSTRING;
+END;
+--------------------------------------------------------------------------------------------------------
+----------- Separar DDD e Telefone  --------------------------
+--------------------------------------------------------------------------------------------------------
+
+-- EXEMPLO DE USO:
+-- SELECT CNPJCONVERTER('08998216930', 'IN') FROM RDB$DATABASE 
+-- SELECT CNPJCONVERTER('089.982.169-30', 'OUT') FROM RDB$DATABASE 
+
+CREATE OR ALTER FUNCTION 
+	CNPJCONVERTER (INPUTSTRING VARCHAR(200), CONVERSIONTYPE VARCHAR(3))
+		RETURNS VARCHAR(20)
+	AS
+	
+		DECLARE DOC VARCHAR(200);
+		DECLARE OUTPUTSTRING VARCHAR(20);
+		DECLARE STRINGLENGTH INT;
+		DECLARE STRINGTYPE VARCHAR(4);
+	
+	BEGIN
+		
+		DOC = REPLACE(MULTIREPLACE(:INPUTSTRING, '{}()abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZÀÁÂÃÄÅÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝÞßàáâãäåçèéêëìíîïðñòóôõöøùúûüýþÿ-|\/*-+.=&¨%$#@!', '          '), ' ', '');
+		STRINGLENGTH = CHAR_LENGTH(DOC);
+		
+		IF (STRINGLENGTH = 11) THEN
+			BEGIN
+				STRINGTYPE = 'CPF';
+			END
+		ELSE
+			BEGIN
+				STRINGTYPE = 'CNPJ';
+			END
+			
+		IF (STRINGTYPE = 'CPF') THEN
+			BEGIN
+				OUTPUTSTRING = CASE 
+					WHEN UPPER(CONVERSIONTYPE) = 'IN' 
+						THEN (SUBSTRING(:DOC FROM 1 FOR 3) || '.' || SUBSTRING(:DOC FROM 4 FOR 3) || '.' || SUBSTRING(:DOC FROM 7 FOR 3) || '-' || SUBSTRING(:DOC FROM 10)) 
+					ELSE 
+						(DOC)
+					END;
+			END
+					
+		IF (STRINGTYPE = 'CNPJ') THEN
+			BEGIN
+				OUTPUTSTRING = CASE 
+					WHEN UPPER(CONVERSIONTYPE) = 'IN' 
+						THEN (SUBSTRING(:DOC FROM 1 FOR 2) || '.' || SUBSTRING(:DOC FROM 3 FOR 3) || '.' || SUBSTRING(:DOC FROM 6 FOR 3) || '/' || SUBSTRING(:DOC FROM 9 FOR 4) || '-' || SUBSTRING(:DOC FROM 13))
+					ELSE 
+						(DOC)
+					END;
+			END
+		
+		RETURN OUTPUTSTRING;
+				
+	END;
+-------------------------------------------------------------------
