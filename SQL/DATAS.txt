@@ -1,0 +1,59 @@
+-- TO_DATE: CONVERTE STRING PARA DATA
+
+SELECT * FROM TABELA WHERE DT_EMISSAO > TO_DATE('10/05/2023', 'DD/MM/YYYY')
+SELECT * FROM TABELA WHERE DT_EMISSAO > TO_DATE('2023-05-10', 'YYYY-MM-DD')
+
+--------------------------------------------------------------------------------------
+
+-- DATA ATUAL:  (current_date)   
+
+SELECT SYSDATE FROM TABELA  --> RETORNA A DATA E HORA ATUAIS.
+SELECT SYSDATE TO_DATE(SYSDATE) FROM TABELA --> RETORNA APENAS A DATA ATUAL
+-------------------------------------------------------------------------------------
+
+-- INTERVALO ENTRE DATAS:  (between)
+(Nesse caso abaixo estou fazendo um select em uma tabela, onde a diferença em meses entre a data de hoje e a data de emissão seja maior do que 3 MESES).   (trunc opcional, para não ficar número quebrado)
+dias: DAYS_BETWEEN
+anos: YEARS_BETWEEN
+
+SELECT * FROM TABELA WHERE TRUNC(MONTHS_BETWEEN(TO_DATE(SYSDATE), DT_EMISSAO), 0) > 3
+-----------------------------------------------------------------------------------
+
+-- ADICIONAR OU INCREMENTAR DATAS: 
+
+(Nesse caso estarei retornando a data atual, e a data atual só que 3 meses no futuro):
+dias: ADD_DAYS
+anos: ADD_YEARS
+
+SELECT TO_DATE(SYSDATE), ADD_MONTHS(TO_DATE(SYSDATE), 3) FROM TABELA
+------------------------------------------------------------------------------------
+
+-- NEXT_DAY:  RETORNA A PRÓXIMA DATA QUE IRÁ CAIR NO DIA DA SEMANA DA SEMANA INFORMADO, EM RELAÇÃO A DATA INFORMADA COMO PARÂMETRO:
+
+SELECT TO_DATE(SYSDATE), NEXT_DAY(TO_DATE(SYSDATE), 'sunday') FROM TABELA   
+---> RETORNA: DATA ATUAL e PRÓXIMO DOMINGO QUE VEM DEPOIS DA DATA ATUAL, SE FOR DOMINGO, RETORNA 1 SEMANA DEPOIS.
+
+(Domingo: SUNDAY -- Segunda: MONDAY -- Terça: TUESDAY -- Quarta: WEDNESDAY -- Quinta: THURSDAY
+Sexta: FRIDAY -- Sábado: SATURDAY)
+
+----------------------------------------------------------------------------------------------------
+FILTRANDO APENAS 1 SEMANA (NESSE CASO A SEMANA DO DIA DE HOJE):
+
+SELECT * FROM TABELA WHERE TO_CHAR(DT_EMISSAO, 'W-MM-YYYY') = TO_CHAR(SYSDATE, 'W-MM-YYYY')
+----------------------------------------------------------------------------------------------------
+
+-- LAST_DAY:  RETORNA O ÚLTIMO DIA DE UM MÊS
+
+SELECT TO_DATE(SYSDATE), LAST_DAY(TO_DATE(SYSDATE)) FROM TABELA   
+--> retorna: 09/05/2023  e  31/05/2023
+
+-----------------------------------------------------------------------------------------------------
+
+-- WHERE DT_EMISSAO DENTRO DO MÊS ATUAL:
+
+SELECT * FROM TABELA WHERE DT_EMISSAO BETWEEN(TO_DATE(SYSDATE) - UDF_DAY(SYSDATE) + 1) AND LAST_DAY(SYSDATE)
+ou
+SELECT * FROM TABELA WHERE EXTRACT(MONTH FROM DT_EMISSAO) = EXTRACT(MONTH FROM SYSDATE)
+
+------------------------------------------------------------------------------------------------------
+
