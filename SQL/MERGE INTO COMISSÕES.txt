@@ -1,4 +1,4 @@
-esse comando MERGE INTO corrige as comissões nos itens do pedido, baseando-se na tabela GRUPO_COMISSAO_001 e as faixas de desconto.
+esse comando MERGE INTO corrige as comissões nos itens do pedido, baseando-se na tabela GRUPO_COMISSAO_001 e as faixas de desconto
 
 MERGE INTO PED_ITEN_001 ITEN
 USING (
