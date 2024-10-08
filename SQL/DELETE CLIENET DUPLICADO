@@ -1,0 +1,32 @@
+--- NA IMPORTAÇÃO, ACONTECE MUITO DE SURGIR CADASTROS DE CLIENTES COM CNPJ DUPLICADO. E GERALMENTE PRECISAMOS EXCLUIR UM E MANTER O OUTRO.
+--- ESSE COMANDO EXCLUI OS REGISTROS DUPLICADOS, MANTENDO APENAS O MAIS IMPORTANTE, UMA VEZ QUE ESTEJA DEFINIDO A ORDEM DE PRIORIDADE.
+
+CREATE TEMP TABLE temp_delete_ids AS
+SELECT e.cod_importado, id_ent, e.codrep, e.codcli, e.nome, e.CNPJ, e.classifica, ROW_NUM
+FROM (
+    SELECT cod_importado, id_ent, codrep, codcli, nome, CNPJ, classifica,
+           ROW_NUMBER() OVER(PARTITION BY CNPJ ORDER BY
+               CASE when classifica = 'CLIENTE' then 0
+                   ELSE 999  
+-- nesse exemplo, a prioridade é manter os registros que são do tipo CLIENTE.
+-- pela ordem de prioridade conseguimos escolher qual registro fica, e qual será deletado.
+               END
+           ) AS row_num
+    FROM entidade_001
+    WHERE CNPJ IN (
+        SELECT CNPJ
+        FROM entidade_001
+        GROUP BY CNPJ
+        HAVING COUNT(*) > 1
+    )
+) AS e
+WHERE e.row_num > 1; -- Mantém apenas os registros com prioridade mais baixa (exceto o primeiro)
+
+-- delete nos registros da tabela principal, eliminando os duplicados
+DELETE FROM entidade_001 E
+WHERE EXISTS (
+    SELECT CNPJ, ID_ENT FROM temp_delete_ids T WHERE T.ID_ENT = E.ID_ENT
+);
+
+-- dropando tabela temporária
+DROP TABLE IF EXISTS temp_delete_ids;
