@@ -1,0 +1,32 @@
+---- FORMATA CPF ----
+merge into ENTIDADE_001 e
+using (
+SELECT distinct codcli, cnpj, concat(concat(concat(concat(concat(concat(substring(cnpj, 1, 3), '.'), substring(cnpj, 4, 3)), '.'), substring(cnpj, 7, 3)), '-'), substring(cnpj, 10, 3)) 
+as cnpj_formatado
+FROM ENTIDADE_001 
+where char_length(cnpj) = 11
+and replace(replace(replace(cnpj, ' ', ''), '           ', ''), ' ', '') <> ''
+and cnpj not like '%.%'
+and cnpj not like '%-%'
+and cnpj not like '%/%'
+) TAB
+on ((e.codcli=tab.codcli))
+when matched then 
+update set cnpj=tab.cnpj_formatado;
+-------------------------------------------------
+---- FORMATA CNPJ ----
+merge into ENTIDADE_001 e
+using (
+SELECT codcli, cnpj, concat(concat(
+concat(concat(concat(concat(concat(concat(substring(cnpj, 1, 2), '.'), substring(cnpj, 3, 3)), '.'), substring(cnpj, 6, 3)), '/'), substring(cnpj, 9, 4)), '-'), substring(cnpj, 13, 4)) 
+as cnpj_formatado
+FROM ENTIDADE_001 
+where char_length(cnpj) = 14
+and replace(replace(replace(cnpj, ' ', ''), '           ', ''), ' ', '') <> ''
+and cnpj not like '%.%'
+and cnpj not like '%-%'
+and cnpj not like '%/%'
+) TAB
+on ((e.codcli=tab.codcli))
+when matched then 
+update set cnpj=tab.cnpj_formatado;
