@@ -1,0 +1,37 @@
+--- EU ELABOREI UM ESQUEMA MUITO ESPERTO PRA COMBINAR SQL + PROGRAMAÇÃO E CONSEGUIR DE FORMA QUASE AUTOMÁTICA, GERAR INSERTS NA TABELA FAIXA_001 E FAIXA_ITEN_001.
+--- ENTÃO, PRIMEIRO É RODADO O SQL, E O RESULTADO DELE, DEVE SER COLADO DENTRO DO CÓDIGO-FONTE DO MEU PROGRAMA EM JAVA, QUE FARÁ O RESTO.
+
+--- QUANDO FOR UM BANCO SISPLAN ORACLE, RODAR ESSE SELECT NO DBEAVER, COPIAR O RESULTADO, E COLAR DENTRO DO MEU PROGRAMA EM JAVA
+S:\Importacao\Programação\Gerando Insert Faixa_Iten\
+ou
+S:\Suporte\Usuarios\kaliel.kautnick\Programação\Gerando Insert Faixa_Iten\
+-------------------------------------------
+select 'int max_faixa = ' || TO_CHAR(MAX(TO_NUMBER(codigo))+1) || ';' max_faixa from faixa_001
+WHERE REGEXP_LIKE(codigo, '^[0-9]+$')
+
+union all
+
+SELECT 'lista[' || TO_CHAR(row_number() over (partition by 1 order by lista)-1) || 
+'] = "' || lista || '";' lista FROM (
+select distinct lista
+from (
+    select listagg(tam, ';') within group (order by cast(acrescimo as int)) as lista, codigo 
+    from (
+        select pa.codigo, cast(t.acrescimo as int) as acrescimo, pa.tam 
+        from pa_iten_001 pa
+        inner join tabtam_001 t on pa.tam = t.tam
+        group by pa.codigo, cast(t.acrescimo as int), pa.tam
+    ) t1
+    group by codigo
+) t2
+where not exists (
+    select y2.lista 
+    from (
+        select listagg(t.tam, ';') within group (order by cast(t.acrescimo as int)) as lista, fx.faixa 
+        from faixa_iten_001 fx
+        inner join tabtam_001 t on t.tam = fx.tamanho
+        group by fx.faixa
+    ) y2
+    where y2.lista = t2.lista
+)
+) tab
