@@ -1,0 +1,34 @@
+--- QUANDO FOR UM BANCO SISPLAN SQLSERVER, RODAR ESSE SELECT NO DBEAVER, COPIAR O RESULTADO, E COLAR DENTRO DO MEU PROGRAMA EM JAVA
+S:\Importacao\Programação\Gerando Insert Faixa_Iten\
+ou
+S:\Suporte\Usuarios\kaliel.kautnick\Programação\Gerando Insert Faixa_Iten\
+---------------------
+
+select 'int max_faixa = ' + cast(max(cast(codigo as integer))+1 as varchar(10)) + ';' max_faixa from faixa_001
+
+union all
+
+select 'lista[' + cast(row_number() over (partition by 1 order by lista)-1 as varchar(50)) + 
+'] = "' + lista + '";' lista from (
+select distinct lista
+from (
+    select string_agg(tam, ';') within group (order by cast(acrescimo as int)) as lista, codigo 
+    from (
+        select pa.codigo, cast(t.acrescimo as int) as acrescimo, pa.tam 
+        from pa_iten_001 pa
+        inner join tabtam_001 t on pa.tam = t.tam
+        group by pa.codigo, cast(t.acrescimo as int), pa.tam
+    ) t1
+    group by codigo
+) t2
+where not exists (
+    select y2.lista 
+    from (
+        select string_agg(t.tam, ';') within group (order by cast(t.acrescimo as int)) as lista, fx.faixa 
+        from faixa_iten_001 fx
+        inner join tabtam_001 t on t.tam = fx.tamanho
+        group by fx.faixa
+    ) y2
+    where y2.lista = t2.lista
+    )
+) tab
