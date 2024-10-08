@@ -1,0 +1,35 @@
+--- PELO POSTGRES, ACHEI UMA FORMA DE FAZER DIRETO POR SQL:
+
+
+insert into faixa_iten_001 (faixa, percentual, tamanho, posicao, id_app)
+select t4.faixa, t4.percentual, t4.tam as tamanho, 
+row_number () over (partition by faixa order by faixa) as posicao,
+row_number () over (partition by 1 order by 1) as id_app from (
+select distinct
+row_number () over (partition by 1 order by 1) + (SELECT MAX(CAST(FAIXA AS INTEGER)) FROM FAIXA_ITEN_001) as faixa,
+0 as percentual,
+unnest(string_to_array(lista, ',')) as tam
+from (
+select distinct lista from (
+select string_agg(tam, ',' order by cast(acrescimo as integer)) as lista, codigo from (
+select pa.codigo, cast(t.acrescimo as integer) as acrescimo, pa.tam 
+from pa_iten_001 pa
+inner join tabtam_001 t on (pa.tam=t.tam)
+group by pa.codigo, cast(t.acrescimo as integer), pa.tam
+order by cast(t.acrescimo as integer), pa.tam) t1
+group by codigo) t2
+where not exists (
+select y2.lista from (
+select string_agg(t.tam, ',' order by cast(t.acrescimo as integer)) as lista, fx.faixa from faixa_iten_001 fx 
+inner join tabtam_001 t on (t.tam=fx.tamanho)
+group by fx.faixa) y2
+where y2.lista=t2.lista)
+) t3) t4
+-----------------------------------------
+depois, pode inserir essas novas faixas na tabela FAIXA_001:
+
+insert into faixa_001 (ativo, codigo, descricao, tamanho)
+select 'S' as ATIVO, faixa as CODIGO, string_agg(tamanho, ',' order by faixa, posicao) as descricao, 6 as TAMANHO from
+faixa_iten_001 fi 
+where cast(faixa as integer) > (SELECT MAX(CAST(CODIGO AS INTEGER)) FROM FAIXA_001)
+group by faixa
