@@ -1,0 +1,41 @@
+--- CERTA VEZ, UM CLIENTE NOSSO RECLAMOU QUE EM DIVERSAS TABELAS (INCONTÁVEIS), EM VÁRIAS COLUNAS, TINHAM DADOS COM VÁRIOS ESPAÇOS EM BRANCO NO FINAL DA STRING, E ISSO DAVA ALGUNS PROBLEMAS.
+--- PENSEI EM ALGUMA FORMA ENGENHOSA E RÁPIDA DE PASSAR UM TRIM EM TODAS AS COLUNAS DE TODAS AS TABELAS QUE CONTÉM ESPAÇOS NO FINAL, E CONSEGUI.
+--- PRIMEIRO, É RODADO UMA 1° QUERY PELO DBEAVER, ESSA QUERY IRÁ GERAR VÁRIOS SELECTS COM UNION ALL, SERÁ NECESSÁRIO COPIAR ESSES VÁRIOS SELECTS GERADOS, E COLAR DENTRO DA SEGUNDA QUERY;
+--- QUANDO ISSO FOR FEITO, SERÁ MONTADO AUTOMATICAMENTE UM MONTE DE UPDATES PARA CORRIGIR TODAS AS COLUNAS DE TODAS AS TABELAS QUE CONTÉM ESPAÇOS EM BRANCO NO FINAL DA STRING.
+--- POUPADO VÁRIAS HORAS DE SERVIÇO, EM POUCOS MINUTOS.
+
+POSTGRES:
+
+-----Consulta 1-----
+select 'SELECT ''' || column_name || ''' nome_campo, ' || column_name || ', ''' || table_name || 
+''' nome_tabela FROM ' || 
+table_name || ' WHERE '|| column_name||' LIKE ''% '' UNION ALL' 
+FROM information_schema.columns
+WHERE upper(table_name)='NOME_DA_TABELA'
+and upper(data_type) not in ('DATE', 'NUMERIC', 'INTEGER', 'BIGINT', 'TIMESTAMP WITHOUT TIME ZONE', 'BYTEA')
+ORDER BY table_name, ordinal_position
+
+
+-----Consulta 2-----
+select distinct 'UPDATE ' || nome_tabela || ' SET ' || NOME_CAMPO || ' = TRIM(' || NOME_CAMPO || ') WHERE ' ||
+NOME_CAMPO || ' LIKE ''% '';' from (
+'coloque aqui os selects que retornaram na consulta 1'
+) TAB
+=======================================================
+
+SQL SERVER:
+
+-----Consulta 1-----
+select 'SELECT ''' + column_name + ''' nome_campo, ' + column_name + ', ''' + table_name + 
+''' nome_tabela FROM ' + 
+table_name + ' WHERE '+ column_name + ' LIKE ''% '' UNION ALL' 
+FROM information_schema.columns
+WHERE upper(table_name)='NOME_DA_TABELA'
+and upper(data_type) not in ('DATE', 'NUMERIC', 'INT', 'DATETIME', 'BIT')
+ORDER BY table_name, column_name
+
+-----Consulta 2-----
+select distinct 'UPDATE ' + nome_tabela + ' SET ' + NOME_CAMPO + ' = TRIM(' + NOME_CAMPO + ') WHERE ' +
+NOME_CAMPO + ' LIKE ''% '';' from (
+'coloque aqui os selects que retornaram na consulta 1'
+) TAB
