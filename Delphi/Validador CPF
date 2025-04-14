@@ -8,12 +8,7 @@ begin
      CPF := StringReplace(CPF,'/','', [rfReplaceAll]);
      CPF := StringReplace(CPF,'-','', [rfReplaceAll]);
 // length - retorna o tamanho da string do CPF (CPF é um número formado por 14 dígitos)
-  if ((CPF = '00000000000') or (CPF = '11111111111') or
-      (CPF = '22222222222') or (CPF = '33333333333') or
-      (CPF = '44444444444') or (CPF = '55555555555') or
-      (CPF = '66666666666') or (CPF = '77777777777') or
-      (CPF = '88888888888') or (CPF = '99999999999') or
-      (length(CPF) <> 11)) then
+  if (length(CPF) <> 11) then
      begin
             valida_CPF := false;
             exit;
