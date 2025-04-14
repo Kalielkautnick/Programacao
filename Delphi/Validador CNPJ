@@ -6,12 +6,7 @@ begin
      CNPJ := StringReplace(CNPJ,'/','', [rfReplaceAll]);
      CNPJ := StringReplace(CNPJ,'-','', [rfReplaceAll]);
 // length - retorna o tamanho da string do CNPJ (CNPJ é um número formado por 14 dígitos)
-  if ((CNPJ = '00000000000000') or (CNPJ = '11111111111111') or
-      (CNPJ = '22222222222222') or (CNPJ = '33333333333333') or
-      (CNPJ = '44444444444444') or (CNPJ = '55555555555555') or
-      (CNPJ = '66666666666666') or (CNPJ = '77777777777777') or
-      (CNPJ = '88888888888888') or (CNPJ = '99999999999999') or
-      (length(CNPJ) <> 14)) then
+  if (length(CNPJ) <> 14) then
      begin
             valida_CNPJ := false;
             exit;
