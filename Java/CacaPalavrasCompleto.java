@@ -18,7 +18,7 @@ public class CacaPalavrasCompleto {
     int mapaQuantColunas = 15;
     palavrasEntrada(palavras);
     mapaEntrada(mapa);
-    mapaPesquisar(mapaQuantLinhas, mapaQuantColunas, mapa, palavras);
+    mapaPesquisar(mapaQuantLinhas, mapaQuantColunas, mapa, palavras); //nesse método, será chamado chamado outros métodos que irão alimentar o mapa Booleano.
     int opcao = 0;
     //menu de 3 opções:
     do {
@@ -41,7 +41,10 @@ public class CacaPalavrasCompleto {
           respostasPalavras(palavras);
           break;
         case 4:
-        imprimirMapaBoolean(mapa, mapaQuantLinhas, mapaQuantColunas, palavras);
+          imprimirMapaBoolean(mapa, mapaQuantLinhas, mapaQuantColunas, palavras);
+          break;
+        case 5:
+          System.out.println("Programa encerrado.");
           break;
         default:
           System.out.println("Opção errada!...");
