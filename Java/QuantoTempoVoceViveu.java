@@ -1,6 +1,8 @@
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.text.NumberFormat;
+import java.util.Locale;
 
 public class QuantoTempoVoceViveu {
 
@@ -8,8 +10,11 @@ public class QuantoTempoVoceViveu {
     DateTimeFormatter fmt = DateTimeFormatter.ofPattern(
       "dd/MM/yyyy - hh:mm:ss"
     );
+
+    NumberFormat nf = NumberFormat.getInstance(new Locale("pt", "BR"));
     //FAZENDO OPERACOES/CALCULOS COM DATAS:
-    LocalDateTime data1 = LocalDateTime.parse("2001-05-07T07:57:00.000");
+    LocalDateTime data1 = LocalDateTime.parse("2004-08-18T14:00:00.000");
+    //LocalDateTime data2 = LocalDateTime.parse("2025-07-01T14:00:00.000");
     LocalDateTime data2 = LocalDateTime.now();
 
     //I N T E R V A L O    E N T R E    D U A S     D A T A S
@@ -28,23 +33,23 @@ public class QuantoTempoVoceViveu {
     );
 
     System.out.println(
-      "A pessoa que nasceu em: " +
-      fmt.format(data1) +
-      "\nViveu: " +
-      diferencaEmAnos +
-      " anos.\n" +
-      diferencaEmMes +
-      " meses.\n" +
-      diferencaEmSemanas +
-      " semanas.\n" +
-      intervaloEmDias +
-      " dias.\n" +
-      diferencaEmHoras +
-      " horas,\n" +
-      diferencaEmMinutos +
-      " minutos.\n" +
-      diferencaEmSegundos +
-      " segundos."
+    "A Pessoa que nasceu em: " +
+    fmt.format(data1) +
+    "\nViveu: " +
+    nf.format(diferencaEmAnos) +
+    " anos.\n" +
+    nf.format(diferencaEmMes) +
+    " meses.\n" +
+    nf.format(diferencaEmSemanas) +
+    " semanas.\n" +
+    nf.format(intervaloEmDias) +
+    " dias.\n" +
+    nf.format(diferencaEmHoras) +
+    " horas,\n" +
+    nf.format(diferencaEmMinutos) +
+    " minutos.\n" +
+    nf.format(diferencaEmSegundos) +
+    " segundos."
     );
   }
 }
